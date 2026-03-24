@@ -6,6 +6,16 @@ Data CLI lets you connect to any data source — a database, a file, a data ware
 
 ---
 
+## Install
+
+```bash
+curl -sSL https://raw.githubusercontent.com/ngtrvu/data-cli/main/install.sh | sh
+```
+
+Or build from source — see [quick start](./.docs/quick-start.md).
+
+---
+
 ## About Data CLI
 
 When you work with an AI coding agent, you often need to give it access to your data — a production database, a JSON log file, a BigQuery dataset. Today, that means copy-pasting schema, writing one-off scripts, or exposing credentials you'd rather keep private.
@@ -13,10 +23,16 @@ When you work with an AI coding agent, you often need to give it access to your 
 Data CLI solves this cleanly:
 
 - You define your data sources once in a config file
-- Your agent calls `data query`, `data schema`, or `data connections` like any other CLI tool
+- Your agent calls `data query`, `data schema`, or `data list` like any other CLI tool
 - Credentials stay on your machine — the agent only ever sees connection names and results
 
 It works for humans too. Run queries, inspect schemas, and explore data directly from your terminal.
+
+---
+
+## Quick Start
+
+See the [Quick Start](./.docs/quick-start.md) for setup, config, and first commands.
 
 ---
 
@@ -47,17 +63,16 @@ data query prod "SELECT * FROM orders" --format json
 See what tables and columns exist before writing a query. Agents use this to understand your data structure automatically.
 
 ```bash
-data schema prod                  # list all tables
-data schema prod orders           # describe columns in a table
-data schema prod orders --format json   # machine-readable for agents
+data schema prod                         # list all tables
+data schema prod orders                  # describe columns
+data schema prod orders --format json    # machine-readable for agents
 ```
 
 **Manage connections**
-List and remove saved connections at any time.
 
 ```bash
-data connections list
-data connections remove staging
+data list             # show all configured sources
+data remove staging   # remove a connection
 ```
 
 ---
@@ -67,10 +82,10 @@ data connections remove staging
 Data CLI is a single Go binary. No runtime, no daemon, no account required.
 
 ```
-~/.data/config.toml          ← your connections live here (credentials stay local)
+~/.data/config/config.toml   ← your connections live here (credentials stay local)
         │
         ▼
-   data connect / query / schema
+   data connect / query / schema / list
         │
         ▼
 ┌───────────────────────────────┐
@@ -92,12 +107,12 @@ Data CLI is a single Go binary. No runtime, no daemon, no account required.
 | Data warehouse | `bigquery` | GCP client, uses ADC or service account |
 
 
-**Config file format** (`~/.data/config.toml`):
+**Config file** (`~/.data/config/config.toml`):
 
 ```toml
 [connections.prod]
 driver    = "postgres"
-dsn       = "env:DATABASE_URL"   # reads from environment variable
+dsn       = "env:DATABASE_URL"   # literal, env:VAR, or gcp-secret:...
 readonly  = true
 row_limit = 1000
 
@@ -115,7 +130,7 @@ row_limit = 500
 timeout   = 30
 ```
 
-The `dsn` field for Postgres accepts a literal connection string, an environment variable reference (`env:VAR`), or a GCP Secret Manager path (`gcp-secret:projects/...`). Credentials are resolved at connection time and never logged or exposed.
+See `[config.example.toml](./config.example.toml)` for all options.
 
 ---
 
