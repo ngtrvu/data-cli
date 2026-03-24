@@ -3,7 +3,13 @@ name: Release
 on:
   push:
     tags:
-      - "v*"
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (for example 1.2.3 or v1.2.3)"
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -26,12 +32,12 @@ jobs:
             arch: arm64
             cc: aarch64-linux-gnu-gcc
 
-          - runner: macos-13        # Intel — native amd64, avoids CGo cross-compile
+          - runner: macos-13 # Intel — native amd64, avoids CGo cross-compile
             os: darwin
             arch: amd64
             cc: clang
 
-          - runner: macos-latest    # Apple Silicon — native arm64
+          - runner: macos-latest # Apple Silicon — native arm64
             os: darwin
             arch: arm64
             cc: clang
