@@ -1,0 +1,56 @@
+version: 2
+
+project_name: data-cli
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: data
+    main: ./cmd
+    binary: data
+    # CGo is required for DuckDB. GoReleaser uses goreleaser-cross Docker
+    # image to provide cross-compilers for each target platform.
+    env:
+      - CGO_ENABLED=1
+    ldflags:
+      - -s -w -X main.version={{.Version}}
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64  # DuckDB has no Windows arm64 support yet
+
+archives:
+  - id: default
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README.md
+      - LICENSE
+      - config.example.toml
+
+checksum:
+  name_template: "checksums.txt"
+
+release:
+  github:
+    owner: ngtrvu
+    name: data-cli
+  draft: true  # review before publishing
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
