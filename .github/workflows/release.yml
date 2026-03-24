@@ -32,15 +32,15 @@ jobs:
             arch: arm64
             cc: aarch64-linux-gnu-gcc
 
-          - runner: macos-13 # Intel — native amd64, avoids CGo cross-compile
+          - runner: macos-latest
             os: darwin
             arch: amd64
-            cc: clang
+            cc: "clang -arch x86_64"
 
-          - runner: macos-latest # Apple Silicon — native arm64
+          - runner: macos-latest
             os: darwin
             arch: arm64
-            cc: clang
+            cc: "clang -arch arm64"
 
     steps:
       - uses: actions/checkout@v4
