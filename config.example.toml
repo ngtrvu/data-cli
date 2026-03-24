@@ -1,0 +1,54 @@
+# Data CLI — example config
+#
+# Config is loaded from the first location that exists:
+#   1. <bin-dir>/config/config.toml   portable / collocated install
+#   2. ~/.data/config/config.toml     home-based install
+#
+# Copy this file to one of those paths and fill in your values.
+
+# ─── Postgres ────────────────────────────────────────────────────────────────
+
+[connections.prod]
+driver    = "postgres"
+dsn       = "postgres://user:password@localhost:5432/mydb"
+readonly  = true   # reject any non-SELECT query
+row_limit = 1000   # cap results per query
+timeout   = 30     # seconds
+
+# DSN from an environment variable
+[connections.staging]
+driver = "postgres"
+dsn    = "env:STAGING_DATABASE_URL"
+
+# DSN from GCP Secret Manager
+[connections.prod-secure]
+driver = "postgres"
+dsn    = "gcp-secret:projects/my-project/secrets/db-url/versions/latest"
+
+# ─── JSON file ───────────────────────────────────────────────────────────────
+
+[connections.events]
+driver = "json"
+path   = "./data/events.json"   # relative or absolute path
+
+# ─── BigQuery ────────────────────────────────────────────────────────────────
+
+# Uses Application Default Credentials (gcloud auth application-default login)
+[connections.warehouse]
+driver  = "bigquery"
+project = "my-gcp-project"
+dataset = "analytics"
+
+# Uses a service account key file
+[connections.warehouse-sa]
+driver      = "bigquery"
+project     = "my-gcp-project"
+dataset     = "analytics"
+credentials = "/path/to/service-account.json"
+
+# ─── Defaults ────────────────────────────────────────────────────────────────
+# Applied to any connection that does not set these fields explicitly.
+
+[defaults]
+row_limit = 500
+timeout   = 30
