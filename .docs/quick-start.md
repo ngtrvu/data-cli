@@ -1,23 +1,19 @@
 # Quick Start
 
-## Prerequisites
+## Install
 
-- Go 1.22+
-- GCC (required for DuckDB CGo)
-- Docker (for running Postgres in tests)
+```bash
+curl -sSL https://raw.githubusercontent.com/ngtrvu/data-cli/main/install.sh | sh
+```
 
----
+## Build from source
 
-## Setup
+**Prerequisites:** Go 1.22+, GCC (for DuckDB CGo), Docker (for tests)
 
 ```bash
 git clone https://github.com/ngtrvu/data-cli
 cd data-cli
-
-# Install dependencies
 go mod download
-
-# Build the binary
 make build
 # → bin/data
 ```

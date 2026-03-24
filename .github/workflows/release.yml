@@ -1,0 +1,97 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  # ── Build one binary per platform ──────────────────────────────────────────
+  build:
+    name: Build (${{ matrix.os }}/${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            os: linux
+            arch: amd64
+            cc: gcc
+
+          - runner: ubuntu-latest
+            os: linux
+            arch: arm64
+            cc: aarch64-linux-gnu-gcc
+
+          - runner: macos-latest
+            os: darwin
+            arch: amd64
+            cc: clang
+
+          - runner: macos-latest
+            os: darwin
+            arch: arm64
+            cc: clang
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Install cross-compiler (linux/arm64 only)
+        if: matrix.os == 'linux' && matrix.arch == 'arm64'
+        run: sudo apt-get install -y gcc-aarch64-linux-gnu
+
+      - name: Build
+        env:
+          CGO_ENABLED: "1"
+          GOOS: ${{ matrix.os }}
+          GOARCH: ${{ matrix.arch }}
+          CC: ${{ matrix.cc }}
+        run: |
+          VERSION=${GITHUB_REF_NAME}
+          go build -ldflags "-s -w -X main.version=${VERSION}" \
+            -o data-${{ matrix.os }}-${{ matrix.arch }} ./cmd
+
+      - name: Package
+        run: |
+          NAME="data-cli_${GITHUB_REF_NAME#v}_${{ matrix.os }}_${{ matrix.arch }}"
+          mkdir -p "$NAME"
+          cp data-${{ matrix.os }}-${{ matrix.arch }} "$NAME/data"
+          cp README.md LICENSE config.example.toml "$NAME/"
+          tar -czf "${NAME}.tar.gz" "$NAME"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: binary-${{ matrix.os }}-${{ matrix.arch }}
+          path: "*.tar.gz"
+
+  # ── Collect artifacts and publish release ──────────────────────────────────
+  release:
+    name: Publish release
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: binary-*
+          merge-multiple: true
+          path: dist
+
+      - name: Checksums
+        run: cd dist && sha256sum *.tar.gz > checksums.txt
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          draft: false
+          generate_release_notes: true
+          files: |
+            dist/*.tar.gz
+            dist/checksums.txt
