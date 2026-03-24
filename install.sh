@@ -4,7 +4,14 @@ set -e
 
 REPO="ngtrvu/data-cli"
 BINARY="data"
-INSTALL_DIR="/usr/local/bin"
+
+# Use /usr/local/bin if writable, otherwise fall back to ~/.local/bin
+if [ -w "/usr/local/bin" ]; then
+  INSTALL_DIR="/usr/local/bin"
+else
+  INSTALL_DIR="$HOME/.local/bin"
+  mkdir -p "$INSTALL_DIR"
+fi
 
 # ── Detect OS and arch ────────────────────────────────────────────────────────
 
@@ -49,8 +56,15 @@ echo "Installing data-cli $VERSION ($OS/$ARCH)..."
 
 curl -fsSL "$URL" -o "$TMP/$ARCHIVE"
 tar -xzf "$TMP/$ARCHIVE" -C "$TMP"
-install -m755 "$TMP/$BINARY" "$INSTALL_DIR/$BINARY"
+install -m755 "$TMP/data-cli_${VERSION#v}_${OS}_${ARCH}/$BINARY" "$INSTALL_DIR/$BINARY"
 rm -rf "$TMP"
 
 echo "Installed to $INSTALL_DIR/$BINARY"
+
+if [ "$INSTALL_DIR" = "$HOME/.local/bin" ]; then
+  echo ""
+  echo "Add to PATH if not already:"
+  echo "  echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.zshrc && source ~/.zshrc"
+fi
+
 echo "Run: data --help"
