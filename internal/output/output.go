@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 	"text/tabwriter"
 
@@ -85,6 +86,7 @@ func writeMarkdown(w io.Writer, result *connector.Result) error {
 	for _, row := range result.Rows {
 		fmt.Fprintf(w, "| %s |\n", strings.Join(rowStrings(row), " | "))
 	}
+	fmt.Fprintf(w, "\n%d rows  (%dms)\n", len(result.Rows), result.Elapsed.Milliseconds())
 	return nil
 }
 
@@ -99,7 +101,21 @@ func colNames(result *connector.Result) []string {
 func rowStrings(row []any) []string {
 	s := make([]string, len(row))
 	for i, v := range row {
-		s[i] = fmt.Sprintf("%v", v)
+		s[i] = FormatValue(v)
 	}
 	return s
+}
+
+func FormatValue(v any) string {
+	if v == nil {
+		return ""
+	}
+	switch n := v.(type) {
+	case float64:
+		return strconv.FormatFloat(n, 'f', -1, 64)
+	case float32:
+		return strconv.FormatFloat(float64(n), 'f', -1, 32)
+	default:
+		return fmt.Sprintf("%v", v)
+	}
 }

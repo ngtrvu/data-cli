@@ -16,23 +16,47 @@ import (
 var (
 	queryFormat string
 	queryLimit  int
+	queryFile   string
+	queryVars   []string
 )
 
 var queryCmd = &cobra.Command{
-	Use:   "query <connection> <sql>",
+	Use:   "query <connection> [sql]",
 	Short: "Run a SQL query",
-	Args:  cobra.ExactArgs(2),
+	Args:  cobra.RangeArgs(1, 2),
 	RunE:  runQuery,
 }
 
 func init() {
 	queryCmd.Flags().StringVar(&queryFormat, "format", "table", "output format: table, csv, json, md")
 	queryCmd.Flags().IntVar(&queryLimit, "limit", 0, "max rows (overrides config)")
+	queryCmd.Flags().StringVar(&queryFile, "file", "", "read SQL from file")
+	queryCmd.Flags().StringArrayVar(&queryVars, "var", nil, "variable substitution key=value (use {{key}} in SQL)")
 	rootCmd.AddCommand(queryCmd)
 }
 
 func runQuery(cmd *cobra.Command, args []string) error {
-	connName, sql := args[0], args[1]
+	connName := args[0]
+
+	var sql string
+	switch {
+	case queryFile != "":
+		data, err := os.ReadFile(queryFile)
+		if err != nil {
+			return fmt.Errorf("read file: %w", err)
+		}
+		sql = string(data)
+	case len(args) == 2:
+		sql = args[1]
+	default:
+		return fmt.Errorf("provide SQL as an argument or use --file")
+	}
+
+	var err error
+	sql, err = applyVars(sql, queryVars)
+	if err != nil {
+		return err
+	}
 
 	cfg, err := config.Load(cfgPath())
 	if err != nil {

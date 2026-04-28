@@ -97,11 +97,16 @@ func (p *postgresConnector) ListTables(ctx context.Context) ([]string, error) {
 }
 
 func (p *postgresConnector) DescribeTable(ctx context.Context, table string) ([]connector.Column, error) {
+	schema := "public"
+	tableName := table
+	if parts := strings.SplitN(table, ".", 2); len(parts) == 2 {
+		schema, tableName = parts[0], parts[1]
+	}
 	rows, err := p.pool.Query(ctx,
 		`SELECT column_name, data_type, is_nullable, column_default
 		 FROM information_schema.columns
-		 WHERE table_name = $1
-		 ORDER BY ordinal_position`, table)
+		 WHERE table_schema = $1 AND table_name = $2
+		 ORDER BY ordinal_position`, schema, tableName)
 	if err != nil {
 		return nil, err
 	}

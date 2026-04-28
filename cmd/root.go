@@ -12,8 +12,9 @@ import (
 var cfgFile string
 
 var rootCmd = &cobra.Command{
-	Use:   "data",
-	Short: "One data CLI for your AI agents",
+	Use:          "data",
+	Short:        "One data CLI for your AI agents",
+	SilenceUsage: true,
 }
 
 func execute() {

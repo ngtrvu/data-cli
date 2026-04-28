@@ -3,6 +3,7 @@ package bigquery
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	bq "cloud.google.com/go/bigquery"
@@ -38,21 +39,19 @@ func (b *bqConnector) Connect(ctx context.Context) error {
 
 func (b *bqConnector) Query(ctx context.Context, sql string, opts connector.QueryOptions) (*connector.Result, error) {
 	start := time.Now()
-	it, err := b.client.Query(sql).Read(ctx)
+	q := b.client.Query(sql)
+	if b.cfg.Dataset != "" {
+		q.DefaultDatasetID = b.cfg.Dataset
+	}
+	if b.cfg.Project != "" {
+		q.DefaultProjectID = b.cfg.Project
+	}
+	it, err := q.Read(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("bigquery query: %w", err)
 	}
 
-	schema := it.Schema
-	cols := make([]connector.Column, len(schema))
-	for i, f := range schema {
-		cols[i] = connector.Column{
-			Name:     f.Name,
-			Type:     string(f.Type),
-			Nullable: !f.Required,
-		}
-	}
-
+	// Collect rows first; Schema is populated after the first Next() call.
 	var rows [][]any
 	for {
 		if opts.RowLimit > 0 && len(rows) >= opts.RowLimit {
@@ -69,6 +68,16 @@ func (b *bqConnector) Query(ctx context.Context, sql string, opts connector.Quer
 			anyRow[i] = v
 		}
 		rows = append(rows, anyRow)
+	}
+
+	schema := it.Schema
+	cols := make([]connector.Column, len(schema))
+	for i, f := range schema {
+		cols[i] = connector.Column{
+			Name:     f.Name,
+			Type:     string(f.Type),
+			Nullable: !f.Required,
+		}
 	}
 
 	return &connector.Result{Columns: cols, Rows: rows, Elapsed: time.Since(start)}, nil
@@ -91,7 +100,17 @@ func (b *bqConnector) ListTables(ctx context.Context) ([]string, error) {
 }
 
 func (b *bqConnector) DescribeTable(ctx context.Context, table string) ([]connector.Column, error) {
-	meta, err := b.client.Dataset(b.cfg.Dataset).Table(table).Metadata(ctx)
+	dataset := b.cfg.Dataset
+	tableID := table
+	// Support dataset.table or project.dataset.table qualified names.
+	parts := strings.SplitN(table, ".", 3)
+	switch len(parts) {
+	case 2:
+		dataset, tableID = parts[0], parts[1]
+	case 3:
+		dataset, tableID = parts[1], parts[2]
+	}
+	meta, err := b.client.Dataset(dataset).Table(tableID).Metadata(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("bigquery describe: %w", err)
 	}
