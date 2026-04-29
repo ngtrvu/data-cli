@@ -64,6 +64,13 @@ data query warehouse "SELECT date, sum(revenue) FROM orders GROUP BY date"
 
 # Agent-friendly JSON output
 data query prod "SELECT * FROM orders" --format json
+
+# Run a query from a .sql file
+data query prod --file path/to/query.sql
+
+# Variable substitution in SQL files or inline queries
+data query prod --file report.sql --var cutoff=2026-01-01
+data query prod "SELECT * FROM users WHERE created_at > '{{cutoff}}'" --var cutoff=2026-04-01
 ```
 
 **Inspect schemas**
