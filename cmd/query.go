@@ -35,24 +35,29 @@ func init() {
 	rootCmd.AddCommand(queryCmd)
 }
 
+func resolveSQL(file string, args []string) (string, error) {
+	switch {
+	case file != "":
+		data, err := os.ReadFile(file)
+		if err != nil {
+			return "", fmt.Errorf("read file: %w", err)
+		}
+		return string(data), nil
+	case len(args) >= 2:
+		return args[1], nil
+	default:
+		return "", fmt.Errorf("provide SQL as an argument or use --file")
+	}
+}
+
 func runQuery(cmd *cobra.Command, args []string) error {
 	connName := args[0]
 
-	var sql string
-	switch {
-	case queryFile != "":
-		data, err := os.ReadFile(queryFile)
-		if err != nil {
-			return fmt.Errorf("read file: %w", err)
-		}
-		sql = string(data)
-	case len(args) == 2:
-		sql = args[1]
-	default:
-		return fmt.Errorf("provide SQL as an argument or use --file")
+	sql, err := resolveSQL(queryFile, args)
+	if err != nil {
+		return err
 	}
 
-	var err error
 	sql, err = applyVars(sql, queryVars)
 	if err != nil {
 		return err

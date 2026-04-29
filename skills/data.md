@@ -28,6 +28,10 @@ data query <name> "<sql>"
 data query <name> "<sql>" --format json
 data query <name> "<sql>" --format csv
 data query <name> "<sql>" --limit 50
+data query <name> --file path/to/query.sql
+data query <name> --file path/to/query.sql --format json
+data query <name> --file path/to/query.sql --var key=value
+data query <name> "<sql with {{key}}>" --var key=value
 
 # Manage connections
 data connect <name> <dsn>
@@ -45,4 +49,6 @@ data version          # print the current version
 - Credentials are never visible — only connection names are exposed
 - Use `--format json` when you need to process results
 - Use `--limit` to avoid large result sets when exploring
+- Use `--file` to run SQL from a `.sql` file instead of an inline string
+- Use `--var key=value` to substitute `{{key}}` placeholders in SQL (works with both inline SQL and `--file`)
 - Errors go to stderr with exit code 1
