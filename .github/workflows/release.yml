@@ -27,10 +27,10 @@ jobs:
             arch: amd64
             cc: gcc
 
-          - runner: ubuntu-latest
+          - runner: ubuntu-22.04-arm
             os: linux
             arch: arm64
-            cc: aarch64-linux-gnu-gcc
+            cc: gcc
 
           - runner: macos-latest
             os: darwin
@@ -49,10 +49,6 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
-
-      - name: Install cross-compiler (linux/arm64 only)
-        if: matrix.os == 'linux' && matrix.arch == 'arm64'
-        run: sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
 
       - name: Build
         env:
