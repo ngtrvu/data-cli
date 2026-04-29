@@ -30,18 +30,41 @@ type DefaultsConfig struct {
 	Timeout  int `toml:"timeout"`
 }
 
-// DefaultPath resolves the config file location using this priority:
-//  1. conf/config.toml next to the running binary  (portable / collocated install)
-//  2. ~/.data/conf/config.toml                     (home-based install)
-func DefaultPath() string {
-	if exe, err := os.Executable(); err == nil {
-		local := filepath.Join(filepath.Dir(exe), "config", "config.toml")
-		if _, err := os.Stat(local); err == nil {
-			return local
-		}
+// LocalPath returns the local project config path: .data/config.toml in the CWD.
+func LocalPath() string {
+	cwd, err := os.Getwd()
+	if err != nil {
+		cwd = "."
 	}
+	return filepath.Join(cwd, ".data", "config.toml")
+}
+
+// GlobalPath returns the user-level (home) config path.
+func GlobalPath() string {
 	home, _ := os.UserHomeDir()
 	return filepath.Join(home, ".data", "config", "config.toml")
+}
+
+// DefaultPath resolves the config file location using this priority:
+//  1. .data/config.toml in the current working directory  (local project config)
+//  2. config/config.toml next to the running binary       (portable / collocated install)
+//  3. ~/.data/config/config.toml                          (home-based / global install)
+func DefaultPath() string {
+	if local := LocalPath(); FileExists(local) {
+		return local
+	}
+	if exe, err := os.Executable(); err == nil {
+		portable := filepath.Join(filepath.Dir(exe), "config", "config.toml")
+		if FileExists(portable) {
+			return portable
+		}
+	}
+	return GlobalPath()
+}
+
+func FileExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
 }
 
 func Load(path string) (*Config, error) {
