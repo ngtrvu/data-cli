@@ -1,8 +1,9 @@
 # Data CLI — example config
 #
 # Config is loaded from the first location that exists:
-#   1. <bin-dir>/config/config.toml   portable / collocated install
-#   2. ~/.data/config/config.toml     home-based install
+#   1. .data/config.toml              local project config (run `data init` to create)
+#   2. <bin-dir>/config/config.toml   portable / collocated install
+#   3. ~/.data/config/config.toml     home-based / global install
 #
 # Copy this file to one of those paths and fill in your values.
 

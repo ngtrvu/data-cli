@@ -38,6 +38,13 @@ See the [Quick Start](./.docs/quick-start.md) for setup, config, and first comma
 
 ## Features
 
+**Initialize a local config**
+Set up a project-level config file in the current directory. Local config takes priority over your global `~/.data/config/config.toml`.
+
+```bash
+data init   # creates .data/config.toml in the current directory
+```
+
 **Connect to anything**
 Add a named connection to a Postgres database, a JSON file, or a BigQuery dataset in one command. Reference it by name everywhere else.
 
@@ -89,10 +96,11 @@ data version          # print the current version
 Data CLI is a single Go binary. No runtime, no daemon, no account required.
 
 ```
-~/.data/config/config.toml   ← your connections live here (credentials stay local)
+.data/config.toml            ← local project config (highest priority)
+~/.data/config/config.toml   ← global config (fallback)
         │
         ▼
-   data connect / query / schema / list
+   data init / connect / query / schema / list
         │
         ▼
 ┌───────────────────────────────┐
@@ -114,7 +122,7 @@ Data CLI is a single Go binary. No runtime, no daemon, no account required.
 | Data warehouse | `bigquery` | GCP client, uses ADC or service account |
 
 
-**Config file** (`~/.data/config/config.toml`):
+**Config file** (`.data/config.toml` locally, or `~/.data/config/config.toml` globally):
 
 ```toml
 [connections.prod]
