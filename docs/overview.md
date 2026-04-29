@@ -83,5 +83,5 @@ data gateway --config ~/.data-cli/config.toml
 
 Currently in active development. Built in Go. Contributions welcome.
 
-See [product-spec.md](./.docs/product.md) for the full feature roadmap.
-See [tech-spec.md](./.docs/tech.md) for architecture and technical decisions.
+See [product-spec.md](./product.md) for the full feature roadmap.
+See [tech-spec.md](./tech.md) for architecture and technical decisions.

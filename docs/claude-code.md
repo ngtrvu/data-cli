@@ -68,8 +68,10 @@ Claude Code will run `data list` → `data schema` → `data query` automaticall
 ## Config location
 
 ```
-~/.data/config/config.toml       # home install
+.data/config.toml                # local project config (highest priority)
+~/.data/config/config.toml       # global / home install
 <bin-dir>/config/config.toml     # portable / next to binary
 ```
 
+Run `data init` to create a local config in the current directory.
 See `config.example.toml` for all available options.

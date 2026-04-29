@@ -11,6 +11,9 @@ Always follow this order:
 ## Commands
 
 ```bash
+# Initialize a local config in the current directory
+data init
+
 # List all configured data sources
 data list
 data list --format json
@@ -29,10 +32,15 @@ data query <name> "<sql>" --limit 50
 # Manage connections
 data connect <name> <dsn>
 data remove <name>
+
+# Upgrade and version
+data upgrade          # upgrade to the latest release
+data version          # print the current version
 ```
 
 ## Rules
 
+- Run `data init` first when setting up a new project — it creates `.data/config.toml` locally
 - Always run `data schema` before querying an unfamiliar table
 - Credentials are never visible — only connection names are exposed
 - Use `--format json` when you need to process results

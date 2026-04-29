@@ -12,7 +12,7 @@ Data CLI lets you connect to any data source — a database, a file, a data ware
 curl -sSL https://raw.githubusercontent.com/ngtrvu/data-cli/main/install.sh | sh
 ```
 
-Or build from source — see [quick start](./.docs/quick-start.md).
+Or build from source — see [quick start](./docs/quick-start.md).
 
 ---
 
@@ -32,7 +32,7 @@ It works for humans too. Run queries, inspect schemas, and explore data directly
 
 ## Quick Start
 
-See the [Quick Start](./.docs/quick-start.md) for setup, config, and first commands.
+See the [Quick Start](./docs/quick-start.md) for setup, config, and first commands.
 
 ---
 
