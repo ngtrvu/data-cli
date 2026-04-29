@@ -75,6 +75,13 @@ data list             # show all configured sources
 data remove staging   # remove a connection
 ```
 
+**Upgrade**
+
+```bash
+data upgrade          # upgrade to the latest release
+data version          # print the current version
+```
+
 ---
 
 ## Architecture
