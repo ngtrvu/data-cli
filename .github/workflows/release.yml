@@ -52,7 +52,7 @@ jobs:
 
       - name: Install cross-compiler (linux/arm64 only)
         if: matrix.os == 'linux' && matrix.arch == 'arm64'
-        run: sudo apt-get install -y gcc-aarch64-linux-gnu
+        run: sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
 
       - name: Build
         env:
